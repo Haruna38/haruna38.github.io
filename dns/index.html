@@ -43,7 +43,7 @@
 
         /* Header */
         header {
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 1.5rem;
         }
@@ -147,6 +147,30 @@
             display: block;
         }
 
+        /* Disclaimer Box */
+        .disclaimer {
+            background-color: rgba(255, 123, 114, 0.1);
+            border-left: 4px solid var(--code-red);
+            padding: 1rem;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .disclaimer-title {
+            font-weight: bold;
+            color: var(--code-red);
+            margin-bottom: 0.5rem;
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .disclaimer ul {
+            margin-bottom: 0;
+        }
+
         /* Tables for params */
         .param-table {
             width: 100%;
@@ -197,6 +221,14 @@
         <h1>DNS Rebind Generator</h1>
         <div class="subtitle">Dynamic DNS resolution control for testing and security research.</div>
     </header>
+
+    <div class="disclaimer">
+        <span class="disclaimer-title">Notice & Disclaimer</span>
+        <ul>
+            <li><strong>Service Availability:</strong> I do not guarantee the availability, uptime, or reliability of this service. It is provided "as-is." Feedback can be sent via Discord DM to <code>@haruna38</code> (or <code>Haruna#5879</code>).</li>
+            <li><strong>Legal Warning:</strong> I accept no responsibility for any damage caused by the use of this tool. This service is intended strictly for <strong>educational purposes and security research only</strong>.</li>
+        </ul>
+    </div>
 
     <section>
         <h2>Base Endpoints</h2>
