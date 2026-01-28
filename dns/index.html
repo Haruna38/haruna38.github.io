@@ -18,6 +18,7 @@
             --code-blue: #79c0ff;
             --code-purple: #d2a8ff;
             --code-red: #ff7b72;
+            --code-orange: #d19a66;
             --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
@@ -114,6 +115,7 @@
         .token-string { color: var(--code-green); }
         .token-comment { color: var(--text-secondary); font-style: italic; }
         .token-var { color: var(--code-purple); }
+        .token-op { color: var(--code-orange); font-weight: bold; }
         .token-error { color: var(--code-red); }
 
         /* Lists */
@@ -238,6 +240,34 @@
     </section>
 
     <section>
+        <h2>Supported Record Types</h2>
+        <p>This service implements specific behaviors for different DNS query types to facilitate testing.</p>
+        
+        <table class="param-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%">Type</th>
+                    <th>Behavior</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>A</code></td>
+                    <td><strong>Processed.</strong> Returns the IPv4 address(es) according to the configured pattern logic.</td>
+                </tr>
+                <tr>
+                    <td><code>AAAA</code></td>
+                    <td><strong>NODATA.</strong> The server purposely returns an empty response (No Data/NOERROR) to indicate no IPv6 address exists.</td>
+                </tr>
+                <tr>
+                    <td><code>Others</code></td>
+                    <td><strong>NXDOMAIN.</strong> Any other record type (TXT, CNAME, MX, etc.) immediately returns a Non-Existent Domain error.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
         <h2>Pattern Construction</h2>
         <p>The <code>&lt;pattern&gt;</code> controls the sequence of IP addresses returned by the resolver. It is constructed by joining <strong>tokens</strong> with a dash (<code>-</code>).</p>
 
@@ -283,20 +313,15 @@
                     <td><code>r</code></td>
                     <td><span class="tag tag-opt">Control</span></td>
                     <td>
-                        <strong>Repeat Flag.</strong> Must be at the very end of the string. If present, the sequence restarts from the beginning after completion. If absent, the resolver sticks to the last result forever.
+                        <strong>Repeat Flag.</strong> Must be at the very end of the pattern. If present, the sequence restarts from the beginning after completion. If absent, the resolver sticks to the last result forever.
                     </td>
                 </tr>
             </tbody>
         </table>
-
-        <div class="note">
-            <span class="note-title">Validation Note</span>
-            Any request with invalid syntax or malformed tokens will result in an <code>NXDOMAIN</code> response.
-        </div>
     </section>
 
     <section>
-        <h2>Examples</h2>
+        <h2>Standard Examples</h2>
         
         <h3>1. Static Resolution</h3>
         <p>Return <code>127.0.0.1</code> every time.</p>
@@ -314,6 +339,44 @@ i7f000001-x-2-d-5-r.attacker.dns.is-now.online</code></pre>
     </section>
 
     <section>
+        <h2>Advanced: Multiple Answers</h2>
+        <p>You can chain multiple patterns together using the plus sign <code>+</code>. This allows you to construct complex responses containing multiple IP addresses (Round Robin) or mix different status codes.</p>
+        
+        <pre><code><span class="token-var">&lt;pattern1&gt;</span><span class="token-op">+</span><span class="token-var">&lt;pattern2&gt;</span><span class="token-op">+</span><span class="token-var">&lt;pattern3&gt;</span></code></pre>
+
+        <h3>Aggregation Logic</h3>
+        <p>When multiple rules are combined, the final response is determined by the following priority:</p>
+        <ul>
+            <li>
+                <strong>Success (IPs):</strong> If <em>at least one</em> rule returns an IP, all valid IPs are returned in the response (A Records). 
+                The IPs are returned in the exact order they are defined in the URL (left to right).
+                Errors from other rules are ignored.
+            </li>
+            <li><strong>NODATA (Empty):</strong> If no rules return an IP, but at least one rule returns <code>NODATA</code> (d), the result is an empty success response (No Answer).</li>
+            <li><strong>NXDOMAIN (Error):</strong> The response is <code>NXDOMAIN</code> only if <strong>ALL</strong> rules return <code>NXDOMAIN</code> (x).</li>
+        </ul>
+
+        <h3>Multi-Answer Examples</h3>
+        <div class="note">
+            <span class="note-title">Example 1: Multiple IPs (Ordered)</span>
+            <p>Returns <code>127.0.0.1</code> first, followed by <code>8.8.8.8</code> in the DNS answer list.</p>
+            <code>i7f000001+i08080808.myid.dns.is-now.online</code>
+        </div>
+
+        <div class="note">
+            <span class="note-title">Example 2: IP takes priority over Error</span>
+            <p>Even though one rule says NXDOMAIN (x), the IP exists, so 127.0.0.1 is returned.</p>
+            <code>i7f000001+x.myid.dns.is-now.online</code>
+        </div>
+
+        <div class="note">
+            <span class="note-title">Example 3: Partial Failure (NODATA)</span>
+            <p>One rule says NXDOMAIN (x), one says Drop (d). Result is NODATA (Empty response, no error).</p>
+            <code>x+d.myid.dns.is-now.online</code>
+        </div>
+    </section>
+
+    <section>
         <h2>Session Management</h2>
         
         <h3>The ID Parameter</h3>
@@ -327,6 +390,7 @@ i7f000001-x-2-d-5-r.attacker.dns.is-now.online</code></pre>
         <h3>Resetting State</h3>
         <p>To reset the request counters for a specific ID without waiting for the timeout, query the <code>reset</code> keyword.</p>
         <pre><code>reset.<span class="token-var">&lt;your_id&gt;</span>.dns.is-now.online</code></pre>
+        <p><strong>Note:</strong> This operation always returns a <code>NODATA</code> response to indicate success.</p>
     </section>
 
 </div>
